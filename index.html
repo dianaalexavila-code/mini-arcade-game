@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MINI ARCADE – PLAY ZONE</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🕹️</span>
+      <div class="logo-text">
+        <span class="logo-title">MINI ARCADE</span>
+        <span class="logo-sub">PLAY ZONE</span>
+      </div>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" data-tab="games">🎮 Games</button>
+      <button class="nav-btn" data-tab="leaderboard">🏆 Leaderboard</button>
+      <button class="nav-btn" data-tab="achievements">🎖️ Achievements</button>
+      <button class="nav-btn" data-tab="profile">👤 Profile</button>
+    </nav>
+    <div class="header-actions">
+      <div class="coin-display">
+        <span class="coin-icon">🪙</span>
+        <span id="coinCount">0</span>
+      </div>
+      <button class="sound-btn" id="soundToggle" title="Toggle Sound">🔊</button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main">
+
+  <!-- GAMES TAB -->
+  <section class="tab-content active" id="tab-games">
+    <div class="section-header">
+      <h2>Choose Your Game</h2>
+      <p>10 awesome arcade games to play!</p>
+    </div>
+    <div class="games-grid" id="gamesGrid">
+      <!-- Cards injected by JS -->
+    </div>
+  </section>
+
+  <!-- LEADERBOARD TAB -->
+  <section class="tab-content" id="tab-leaderboard">
+    <div class="section-header">
+      <h2>🏆 Leaderboard</h2>
+      <p>Top scores across all games</p>
+    </div>
+    <div class="lb-filter">
+      <select id="lbGameFilter">
+        <option value="all">All Games</option>
+      </select>
+    </div>
+    <div class="leaderboard-table-wrap">
+      <table class="lb-table">
+        <thead><tr><th>#</th><th>Game</th><th>Score</th><th>Level</th><th>Date</th></tr></thead>
+        <tbody id="lbTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ACHIEVEMENTS TAB -->
+  <section class="tab-content" id="tab-achievements">
+    <div class="section-header">
+      <h2>🎖️ Achievements</h2>
+      <p>Unlock achievements by playing games</p>
+    </div>
+    <div class="achievements-grid" id="achievementsGrid"></div>
+  </section>
+
+  <!-- PROFILE TAB -->
+  <section class="tab-content" id="tab-profile">
+    <div class="section-header">
+      <h2>👤 Profile</h2>
+    </div>
+    <div class="profile-card">
+      <div class="profile-avatar">🎮</div>
+      <div class="profile-info">
+        <h3 id="profileName">Arcade Player</h3>
+        <p id="profileStats">Loading stats...</p>
+      </div>
+    </div>
+    <div class="profile-stats-grid" id="profileStatsGrid"></div>
+    <div class="profile-actions">
+      <button class="btn btn-danger" id="resetDataBtn">🗑️ Reset All Data</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== GAME MODAL ===== -->
+<div class="game-modal" id="gameModal" aria-hidden="true">
+  <div class="game-modal-inner">
+    <div class="game-modal-header">
+      <div class="game-modal-title">
+        <span id="modalGameIcon"></span>
+        <span id="modalGameName"></span>
+      </div>
+      <div class="game-modal-controls">
+        <div class="hud-item"><span class="hud-label">SCORE</span><span class="hud-value" id="hudScore">0</span></div>
+        <div class="hud-item"><span class="hud-label">LIVES</span><span class="hud-value" id="hudLives">❤️❤️❤️</span></div>
+        <div class="hud-item"><span class="hud-label">LEVEL</span><span class="hud-value" id="hudLevel">1</span></div>
+        <button class="btn btn-sm btn-pause" id="pauseBtn">⏸ Pause</button>
+        <button class="btn btn-sm btn-close-game" id="closeGameBtn">✕ Exit</button>
+      </div>
+    </div>
+
+    <!-- Difficulty Selector -->
+    <div class="difficulty-screen" id="difficultyScreen">
+      <div class="diff-card">
+        <h2 id="diffGameTitle">Choose Difficulty</h2>
+        <p id="diffGameDesc"></p>
+        <div class="diff-buttons">
+          <button class="btn btn-diff" data-diff="easy">🟢 Easy</button>
+          <button class="btn btn-diff" data-diff="medium">🟡 Medium</button>
+          <button class="btn btn-diff" data-diff="hard">🔴 Hard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Touch Controls -->
+    <div class="touch-controls" id="touchControls">
+      <div class="touch-row">
+        <button class="touch-btn" id="tc-up">▲</button>
+      </div>
+      <div class="touch-row">
+        <button class="touch-btn" id="tc-left">◀</button>
+        <button class="touch-btn touch-action" id="tc-action">🔥</button>
+        <button class="touch-btn" id="tc-right">▶</button>
+      </div>
+      <div class="touch-row">
+        <button class="touch-btn" id="tc-down">▼</button>
+      </div>
+    </div>
+
+    <!-- Game Over / Win Screen -->
+    <div class="overlay-screen" id="gameOverScreen" style="display:none">
+      <div class="overlay-card">
+        <div class="overlay-emoji" id="overlayEmoji">💀</div>
+        <h2 id="overlayTitle">GAME OVER</h2>
+        <p id="overlayMsg"></p>
+        <div class="overlay-score">Score: <strong id="finalScore">0</strong></div>
+        <div class="overlay-coins">+<strong id="finalCoins">0</strong> 🪙</div>
+        <div class="overlay-buttons">
+          <button class="btn btn-primary" id="restartBtn">🔄 Play Again</button>
+          <button class="btn btn-secondary" id="menuBtn">🏠 Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause Screen -->
+    <div class="overlay-screen" id="pauseScreen" style="display:none">
+      <div class="overlay-card">
+        <div class="overlay-emoji">⏸️</div>
+        <h2>PAUSED</h2>
+        <div class="overlay-buttons">
+          <button class="btn btn-primary" id="resumeBtn">▶ Resume</button>
+          <button class="btn btn-secondary" id="pauseMenuBtn">🏠 Menu</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
